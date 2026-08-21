@@ -9,13 +9,15 @@ Twelve production-oriented disaster-recovery scenarios for an Active-Passive Hot
 | **RB-03** | DNS poisoning / DNS infrastructure failure | [RB-03-decision-tree.md](./RB-03-decision-tree.md) |
 | **RB-04** | Kafka / MSK cluster failure | [RB-04-decision-tree.md](./RB-04-decision-tree.md) |
 | **RB-05** | Network partition / split-brain prevention | [RB-05-decision-tree.md](./RB-05-decision-tree.md) |
-| **RB-06** | Cryptographic key compromise | — |
+| **RB-06** | Cryptographic key compromise | [RB-06-decision-tree.md](./RB-06-decision-tree.md) |
 | **RB-07** | DDoS on payment API | [RB-07-decision-tree.md](./RB-07-decision-tree.md) |
-| **RB-08** | Third-party NPCI / UPI outage | — |
-| **RB-09** | Certificate expiry / TLS failure | — |
+| **RB-08** | Third-party NPCI / UPI outage | [RB-08-decision-tree.md](./RB-08-decision-tree.md) |
+| **RB-09** | Certificate expiry / TLS failure | [RB-09-decision-tree.md](./RB-09-decision-tree.md) |
 | **RB-10** | Single-AZ power failure | [RB-10-decision-tree.md](./RB-10-decision-tree.md) |
-| **RB-11** | Ransomware | — |
-| **RB-12** | Cascading microservice failure | — |
+| **RB-11** | Ransomware | [RB-11-decision-tree.md](./RB-11-decision-tree.md) |
+| **RB-12** | Cascading microservice failure | [RB-12-decision-tree.md](./RB-12-decision-tree.md) |
+
+**All 12 decision trees are published.**
 
 ## Shared rules across all runbooks
 
