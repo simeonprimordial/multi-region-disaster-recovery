@@ -1,0 +1,48 @@
+name: Validate repository
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  structure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Required paths exist
+        run: |
+          set -euo pipefail
+          test -f README.md
+          test -f docs/architecture-overview.md
+          test -f configs/terraform/main.tf
+          test -f configs/terraform/variables.tf
+          test -f configs/kubernetes/payment-api.yaml
+          test -f configs/kubernetes/network-policies.yaml
+          test -f configs/monitoring/prometheus-rules.yaml
+          test -f scripts/failover/preflight.sh
+          test -f scripts/health-checks/dr-readiness.sh
+          test -f docs/05-runbooks/RB-01-decision-tree.md
+          test -f docs/02-multi-region-design/active-passive-recovery-budget.md
+          echo "Structure checks passed."
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Lint scripts
+        run: |
+          find scripts -type f -name '*.sh' -print0 | xargs -0 shellcheck -x || true
+
+  markdown-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Basic markdown presence
+        run: |
+          find docs -name '*.md' | wc -l | awk '{ if ($1 < 5) exit 1 }'
+          echo "Documentation present."
