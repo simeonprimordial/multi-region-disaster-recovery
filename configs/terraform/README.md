@@ -1,48 +1,36 @@
-# Terraform — Multi-Region DR Composition
+# Terraform — Multi-Region DR Skeleton
 
-Root configuration and modules for the PaySecure multi-Region Active-Passive hot-standby design.
+Infrastructure-as-code layout for an **Active-Passive Hot Standby** payment platform:
 
-## Layout
+| Region | Role |
+|--------|------|
+| `ap-south-1` (Mumbai) | Primary payment write path |
+| `ap-south-2` (Hyderabad) | Continuously testable hot standby |
 
-```text
-configs/terraform/
-├── versions.tf / providers.tf / variables.tf / locals.tf
-├── main.tf              # Root composition
-├── outputs.tf
-├── backend.hcl.example
-├── terraform.tfvars.example
-└── modules/
-    ├── networking/
-    ├── compute/           # EKS (primary + DR)
-    ├── database/          # Aurora Global Database
-    ├── dynamodb/          # Global Table
-    ├── cache/             # Redis Global Datastore
-    ├── messaging/         # MSK + Replicator
-    ├── dns/               # Route 53 failover + health checks
-    ├── monitoring/
-    ├── security/          # KMS + WAF
-    └── workload-identity/
-```
+## Files
 
-## Regions
+| File | Purpose |
+|------|---------|
+| `versions.tf` | Terraform and provider version constraints |
+| `providers.tf` | Dual AWS providers (`primary` / `dr`) with default tags |
+| `variables.tf` | Region, project, environment, DR-tier, cost-center inputs |
+| `locals.tf` | Shared tags |
+| `main.tf` | Module composition skeleton (networking, EKS, Aurora Global, DynamoDB Global Tables, Redis Global Datastore, MSK + Replicator, Route 53 failover, monitoring, security) |
+| `outputs.tf` | Region and project outputs; module outputs wired when modules are instantiated |
 
-| Role | Region | Notes |
-|------|--------|-------|
-| Primary | `ap-south-1` (Mumbai) | Active EKS (~24 workers), full data plane |
-| DR | `ap-south-2` (Hyderabad) | Warm EKS (~12 workers), replicated state |
+## Design notes
 
-## What this proves
+- **Dual-provider pattern** keeps primary and DR resources in separate regional contexts while sharing a single root module.
+- **Backend** is S3 (configured at init time); state is not committed.
+- **Modules** are compositional stubs suitable for portfolio demonstration. Production values (CIDRs, instance classes, certificate ARNs, health-check IDs) are environment-specific and intentionally placeholder.
+- **Financial-authority controls** (fencing, promotion, `DRServeReady`) live in operational runbooks and automation — not in Terraform apply alone.
 
-Static composition and module wiring for networking, compute, data, DNS, security and monitoring.  
-It does **not** claim live AWS apply success, measured lag, or timed RTO/RPO evidence.
-
-## Usage (local)
+## Usage (illustrative)
 
 ```bash
-cp terraform.tfvars.example terraform.tfvars
-# edit values; do not commit secrets
-
 terraform init
-terraform validate
-terraform plan   # requires credentials and backend
+terraform plan -var-file=env/example.tfvars
+# apply only in an authorised non-production account after review
 ```
+
+This repository does **not** claim a live multi-Region deployment. Static structure and design intent are the portfolio deliverable.

@@ -6,11 +6,11 @@ Twelve production-oriented disaster-recovery scenarios for an Active-Passive Hot
 |----|----------|---------------|
 | **RB-01** | Complete primary Region failure | [RB-01-decision-tree.md](./RB-01-decision-tree.md) |
 | **RB-02** | Database corruption | [RB-02-decision-tree.md](./RB-02-decision-tree.md) |
-| **RB-03** | DNS poisoning / DNS infrastructure failure | — |
-| **RB-04** | Kafka / MSK cluster failure | — |
+| **RB-03** | DNS poisoning / DNS infrastructure failure | [RB-03-decision-tree.md](./RB-03-decision-tree.md) |
+| **RB-04** | Kafka / MSK cluster failure | [RB-04-decision-tree.md](./RB-04-decision-tree.md) |
 | **RB-05** | Network partition / split-brain prevention | [RB-05-decision-tree.md](./RB-05-decision-tree.md) |
 | **RB-06** | Cryptographic key compromise | — |
-| **RB-07** | DDoS on payment API | — |
+| **RB-07** | DDoS on payment API | [RB-07-decision-tree.md](./RB-07-decision-tree.md) |
 | **RB-08** | Third-party NPCI / UPI outage | — |
 | **RB-09** | Certificate expiry / TLS failure | — |
 | **RB-10** | Single-AZ power failure | [RB-10-decision-tree.md](./RB-10-decision-tree.md) |
@@ -26,3 +26,5 @@ Twelve production-oriented disaster-recovery scenarios for an Active-Passive Hot
 5. **Stop for safety** if dual-write, unreconcilable corruption, or uncontrolled exposure is detected.
 
 Full procedure bodies (commands, roles, timings, communication templates) are environment-specific and are not published in this public portfolio version. Decision trees capture the branching logic that keeps financial safety intact.
+
+See also: [drill success criteria](../08-dr-drill-plan/drill-success-criteria.md) · [annual drill plan](../08-dr-drill-plan/annual-drill-plan.md) · [post-drill template](../08-dr-drill-plan/post-drill-template.md).
