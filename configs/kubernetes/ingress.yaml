@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: payment-api
+  namespace: payment-production
+  labels:
+    app.kubernetes.io/name: payment-api
+    app.kubernetes.io/part-of: paysecure
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/healthcheck-path: /health/ready
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/success-codes: "200"
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:REGION:000000000000:certificate/REPLACE_AT_DEPLOY_TIME"
+    alb.ingress.kubernetes.io/wafv2-acl-arn: "arn:aws:wafv2:REGION:000000000000:regional/webacl/REPLACE_AT_DEPLOY_TIME/00000000-0000-0000-0000-000000000000"
+spec:
+  ingressClassName: alb
+  rules:
+    - host: api.paysecure.in
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: payment-api
+                port:
+                  number: 80
