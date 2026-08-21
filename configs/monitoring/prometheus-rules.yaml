@@ -1,0 +1,107 @@
+groups:
+  - name: payment-path
+    interval: 15s
+    rules:
+      - alert: PaymentSuccessRateCritical
+        expr: |
+          (
+            sum(rate(http_requests_total{namespace="payment-production",service="payment-api",status=~"2..|3.."}[1m]))
+            /
+            clamp_min(sum(rate(http_requests_total{namespace="payment-production",service="payment-api"}[1m])), 1)
+          ) < 0.80
+        for: 30s
+        labels:
+          severity: critical
+          runbook: RB-01
+        annotations:
+          summary: Payment API success rate below 80%
+          description: Corroborate with regional health before declaring a regional disaster.
+
+      - alert: PaymentApiP99High
+        expr: |
+          histogram_quantile(
+            0.99,
+            sum by (le, region) (rate(http_request_duration_seconds_bucket{namespace="payment-production",service="payment-api"}[5m]))
+          ) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Payment API p99 latency above 500 ms
+
+  - name: dr-readiness
+    interval: 15s
+    rules:
+      - alert: AuroraRpoLagHigh
+        expr: aurora_global_rpo_lag_seconds > 30
+        for: 1m
+        labels:
+          severity: critical
+          dr_gate: aurora
+        annotations:
+          summary: Aurora Global Database RPO lag above 30 seconds
+
+      - alert: DynamoReplicationLagHigh
+        expr: dynamodb_replication_latency_seconds > 15
+        for: 1m
+        labels:
+          severity: warning
+          dr_gate: dynamodb
+        annotations:
+          summary: DynamoDB idempotency replica convergence above 15 seconds
+
+      - alert: MskReplicationLagHigh
+        expr: msk_replication_latency_seconds > 30
+        for: 1m
+        labels:
+          severity: critical
+          dr_gate: msk
+        annotations:
+          summary: Critical Kafka replication lag above 30 seconds
+
+      - alert: RedisGlobalLagHigh
+        expr: redis_global_replication_lag_seconds > 60
+        for: 1m
+        labels:
+          severity: warning
+          dr_gate: redis
+        annotations:
+          summary: Redis Global Datastore recovery-state lag above 60 seconds
+
+      - alert: DrServeReadyMissingDuringFailover
+        expr: dr_failover_declared == 1 and dr_serve_ready != 1
+        for: 2m
+        labels:
+          severity: critical
+          runbook: RB-01
+        annotations:
+          summary: DR failover declared but standby Region has not passed serving gates
+
+      - alert: DualWriteAuthorityDetected
+        expr: sum(financial_write_authority == 1) != 1
+        for: 5s
+        labels:
+          severity: critical
+          runbook: RB-05
+        annotations:
+          summary: Financial write authority invariant violated
+          description: Exactly one Region must report write authority during normal or DR operation.
+
+  - name: capacity
+    interval: 30s
+    rules:
+      - alert: CriticalPodsUnavailable
+        expr: kube_deployment_status_replicas_available{namespace="payment-production",deployment=~"payment-api|transaction-processor"} < 3
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Critical payment workload has fewer than three available replicas
+
+      - alert: HpaAtMaxCapacity
+        expr: kube_horizontalpodautoscaler_status_current_replicas{namespace="payment-production"} >= kube_horizontalpodautoscaler_spec_max_replicas{namespace="payment-production"}
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: HPA is pinned at maximum replicas
