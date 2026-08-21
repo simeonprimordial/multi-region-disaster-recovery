@@ -23,7 +23,7 @@ Mumbai (`ap-south-1`) primary · Hyderabad (`ap-south-2`) hot standby.
 | | Active-Passive | Active-Active |
 |--|---------------:|--------------:|
 | Engineering full RTO target | ~240 s | ~180 s |
-| Approx. annual infra (mid) | ~₹11.6–12.6 cr | ~₹15–16 cr |
+| Approx. annual infra (optimized) | ~₹12.6 cr | ~₹15.1 cr |
 | Serving payment Regions | 1 | 2 |
 | Aurora write authority | 1 primary | 2 shard primaries |
 | MSK replication directions | 1 | 2 |
@@ -32,11 +32,23 @@ Mumbai (`ap-south-1`) primary · Hyderabad (`ap-south-2`) hot standby.
 
 1. Meets sub-5-minute RTO target on the planned critical path with headroom  
 2. Single financial write authority — lower split-brain and duplicate-payment risk  
-3. Lower cost (~₹4+ crore/year midpoint difference)  
+3. Lower cost (~₹2.5+ crore/year optimized difference)  
 4. Operational fit for an ~8-person platform team  
 5. Simpler compliance/audit narrative (India-resident primary + controlled promotion)  
 6. Baseline P99 latency remains local to Mumbai under normal conditions  
 
 Active-Active remains a documented future option if volume, downtime economics, and team maturity justify dual-writer complexity.
 
-Full matrix and recovery budgets live alongside this summary in the private engineering notes; this file is the portfolio decision snapshot.
+## Engineering Recovery Gates
+
+| Gate | Target |
+|------|--------|
+| End-to-end recovery critical path | ≤ 240 s (AP) / ≤ 180 s (AA) |
+| Hard RTO | < 300 s |
+| Financial RPO | < 60 s |
+| Aurora lag | ≤ 30 s |
+| DynamoDB convergence | ≤ 15 s |
+| MSK replication lag | ≤ 30 s |
+| Redis recovery state | ≤ 60 s |
+
+These are design objectives; they become proven only after timed drills.
